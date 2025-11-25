@@ -129,146 +129,146 @@ class CharacterTokenizer:
         return tokenizer
 
 
-class WordTokenizer:
-    """
-    Word-level tokenizer for URLs
-    Splits URL into tokens (domain parts, path segments, parameters)
-    """
+# class WordTokenizer:
+#     """
+#     Word-level tokenizer for URLs
+#     Splits URL into tokens (domain parts, path segments, parameters)
+#     """
     
-    def __init__(self, max_length=50, vocab_size=10000):
-        """
-        Args:
-            max_length: Maximum sequence length
-            vocab_size: Maximum vocabulary size
-        """
-        self.max_length = max_length
-        self.max_vocab_size = vocab_size
-        self.word_to_id = {}
-        self.id_to_word = {}
-        self.vocab_size = 0
+#     def __init__(self, max_length=50, vocab_size=10000):
+#         """
+#         Args:
+#             max_length: Maximum sequence length
+#             vocab_size: Maximum vocabulary size
+#         """
+#         self.max_length = max_length
+#         self.max_vocab_size = vocab_size
+#         self.word_to_id = {}
+#         self.id_to_word = {}
+#         self.vocab_size = 0
         
-    def tokenize_url(self, url):
-        """
-        Split URL into tokens
+#     def tokenize_url(self, url):
+#         """
+#         Split URL into tokens
         
-        Args:
-            url: URL string
+#         Args:
+#             url: URL string
             
-        Returns:
-            List of tokens
-        """
-        import re
+#         Returns:
+#             List of tokens
+#         """
+#         import re
         
-        # Remove protocol
-        url = re.sub(r'https?://', '', url.lower())
+#         # Remove protocol
+#         url = re.sub(r'https?://', '', url.lower())
         
-        # Split by common delimiters
-        tokens = re.split(r'[/\.\-_=&?;:]', url)
+#         # Split by common delimiters
+#         tokens = re.split(r'[/\.\-_=&?;:]', url)
         
-        # Remove empty tokens
-        tokens = [t for t in tokens if t]
+#         # Remove empty tokens
+#         tokens = [t for t in tokens if t]
         
-        return tokens
+#         return tokens
     
-    def fit(self, urls):
-        """
-        Build vocabulary from URLs
+#     def fit(self, urls):
+#         """
+#         Build vocabulary from URLs
         
-        Args:
-            urls: List of URL strings
-        """
-        from collections import Counter
+#         Args:
+#             urls: List of URL strings
+#         """
+#         from collections import Counter
         
-        # Collect all tokens
-        all_tokens = []
-        for url in urls:
-            all_tokens.extend(self.tokenize_url(url))
+#         # Collect all tokens
+#         all_tokens = []
+#         for url in urls:
+#             all_tokens.extend(self.tokenize_url(url))
         
-        # Count frequencies
-        token_counts = Counter(all_tokens)
+#         # Count frequencies
+#         token_counts = Counter(all_tokens)
         
-        # Keep top tokens
-        top_tokens = token_counts.most_common(self.max_vocab_size - 1)
+#         # Keep top tokens
+#         top_tokens = token_counts.most_common(self.max_vocab_size - 1)
         
-        # Build vocabulary (reserve 0 for padding)
-        self.word_to_id = {word: idx + 1 for idx, (word, _) in enumerate(top_tokens)}
-        self.id_to_word = {idx + 1: word for idx, (word, _) in enumerate(top_tokens)}
-        self.vocab_size = len(top_tokens) + 1
+#         # Build vocabulary (reserve 0 for padding)
+#         self.word_to_id = {word: idx + 1 for idx, (word, _) in enumerate(top_tokens)}
+#         self.id_to_word = {idx + 1: word for idx, (word, _) in enumerate(top_tokens)}
+#         self.vocab_size = len(top_tokens) + 1
         
-        print(f"✓ Word vocabulary built: {self.vocab_size} tokens")
-        print(f"  Sample tokens: {list(self.word_to_id.keys())[:20]}")
+#         print(f"✓ Word vocabulary built: {self.vocab_size} tokens")
+#         print(f"  Sample tokens: {list(self.word_to_id.keys())[:20]}")
         
-        return self
+#         return self
     
-    def encode_sequence(self, url):
-        """
-        Encode URL to sequence of token IDs
+#     def encode_sequence(self, url):
+#         """
+#         Encode URL to sequence of token IDs
         
-        Args:
-            url: URL string
+#         Args:
+#             url: URL string
             
-        Returns:
-            numpy array of shape (max_length,)
-        """
-        tokens = self.tokenize_url(url)
+#         Returns:
+#             numpy array of shape (max_length,)
+#         """
+#         tokens = self.tokenize_url(url)
         
-        # Convert to IDs
-        ids = [self.word_to_id.get(token, 0) for token in tokens]
+#         # Convert to IDs
+#         ids = [self.word_to_id.get(token, 0) for token in tokens]
         
-        # Truncate or pad
-        if len(ids) > self.max_length:
-            ids = ids[:self.max_length]
-        else:
-            ids = ids + [0] * (self.max_length - len(ids))
+#         # Truncate or pad
+#         if len(ids) > self.max_length:
+#             ids = ids[:self.max_length]
+#         else:
+#             ids = ids + [0] * (self.max_length - len(ids))
         
-        return np.array(ids, dtype=np.int32)
+#         return np.array(ids, dtype=np.int32)
     
-    def encode_batch(self, urls):
-        """
-        Encode multiple URLs
+#     def encode_batch(self, urls):
+#         """
+#         Encode multiple URLs
         
-        Args:
-            urls: List of URL strings
+#         Args:
+#             urls: List of URL strings
             
-        Returns:
-            numpy array of shape (len(urls), max_length)
-        """
-        return np.array([self.encode_sequence(url) for url in urls])
+#         Returns:
+#             numpy array of shape (len(urls), max_length)
+#         """
+#         return np.array([self.encode_sequence(url) for url in urls])
     
-    def save(self, filepath):
-        """Save tokenizer to file"""
-        filepath = Path(filepath)
-        filepath.parent.mkdir(parents=True, exist_ok=True)
+#     def save(self, filepath):
+#         """Save tokenizer to file"""
+#         filepath = Path(filepath)
+#         filepath.parent.mkdir(parents=True, exist_ok=True)
         
-        with open(filepath, 'wb') as f:
-            pickle.dump({
-                'max_length': self.max_length,
-                'max_vocab_size': self.max_vocab_size,
-                'word_to_id': self.word_to_id,
-                'id_to_word': self.id_to_word,
-                'vocab_size': self.vocab_size
-            }, f)
+#         with open(filepath, 'wb') as f:
+#             pickle.dump({
+#                 'max_length': self.max_length,
+#                 'max_vocab_size': self.max_vocab_size,
+#                 'word_to_id': self.word_to_id,
+#                 'id_to_word': self.id_to_word,
+#                 'vocab_size': self.vocab_size
+#             }, f)
         
-        print(f"✓ Tokenizer saved to {filepath}")
+#         print(f"✓ Tokenizer saved to {filepath}")
     
-    @classmethod
-    def load(cls, filepath):
-        """Load tokenizer from file"""
-        with open(filepath, 'rb') as f:
-            data = pickle.load(f)
+#     @classmethod
+#     def load(cls, filepath):
+#         """Load tokenizer from file"""
+#         with open(filepath, 'rb') as f:
+#             data = pickle.load(f)
         
-        tokenizer = cls(
-            max_length=data['max_length'],
-            vocab_size=data['max_vocab_size']
-        )
-        tokenizer.word_to_id = data['word_to_id']
-        tokenizer.id_to_word = data['id_to_word']
-        tokenizer.vocab_size = data['vocab_size']
+#         tokenizer = cls(
+#             max_length=data['max_length'],
+#             vocab_size=data['max_vocab_size']
+#         )
+#         tokenizer.word_to_id = data['word_to_id']
+#         tokenizer.id_to_word = data['id_to_word']
+#         tokenizer.vocab_size = data['vocab_size']
         
-        print(f"✓ Tokenizer loaded from {filepath}")
-        print(f"  Vocab size: {tokenizer.vocab_size}, Max length: {tokenizer.max_length}")
+#         print(f"✓ Tokenizer loaded from {filepath}")
+#         print(f"  Vocab size: {tokenizer.vocab_size}, Max length: {tokenizer.max_length}")
         
-        return tokenizer
+#         return tokenizer
 
 
 if __name__ == "__main__":
@@ -291,26 +291,26 @@ if __name__ == "__main__":
     char_tokenizer = CharacterTokenizer(max_length=50)
     char_tokenizer.fit(urls)
     
-    encoded = char_tokenizer.encode_sequence(urls[0])
-    print(f"\nOriginal URL: {urls[0]}")
-    print(f"Encoded: {encoded}")
-    print(f"Shape: {encoded.shape}")
+    # encoded = char_tokenizer.encode_sequence(urls[0])
+    # print(f"\nOriginal URL: {urls[0]}")
+    # print(f"Encoded: {encoded}")
+    # print(f"Shape: {encoded.shape}")
     
-    decoded = char_tokenizer.decode_sequence(encoded)
-    print(f"Decoded: {decoded}")
+    # decoded = char_tokenizer.decode_sequence(encoded)
+    # print(f"Decoded: {decoded}")
     
-    # Test Word Tokenizer
-    print("\n2. Word Tokenizer")
-    print("-" * 40)
-    word_tokenizer = WordTokenizer(max_length=20)
-    word_tokenizer.fit(urls)
+    # # Test Word Tokenizer
+    # print("\n2. Word Tokenizer")
+    # print("-" * 40)
+    # word_tokenizer = WordTokenizer(max_length=20)
+    # word_tokenizer.fit(urls)
     
-    encoded = word_tokenizer.encode_sequence(urls[0])
-    print(f"\nOriginal URL: {urls[0]}")
-    print(f"Tokens: {word_tokenizer.tokenize_url(urls[0])}")
-    print(f"Encoded: {encoded}")
-    print(f"Shape: {encoded.shape}")
+    # encoded = word_tokenizer.encode_sequence(urls[0])
+    # print(f"\nOriginal URL: {urls[0]}")
+    # print(f"Tokens: {word_tokenizer.tokenize_url(urls[0])}")
+    # print(f"Encoded: {encoded}")
+    # print(f"Shape: {encoded.shape}")
     
-    print("\n" + "="*80)
-    print("✓ All tokenizers tested successfully!")
-    print("="*80)
+    # print("\n" + "="*80)
+    # print("✓ All tokenizers tested successfully!")
+    # print("="*80)
